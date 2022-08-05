@@ -1,5 +1,5 @@
 This repo has example code for the distributed system workshop.
-For building, just run './gradlew clean test'
+For building, just run './gradlew clean assemble'
 #Assignments
 1. Make KVStore durable with write ahead log.
 2. Pass the WalBackedKVStoreTest
