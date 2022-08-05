@@ -39,6 +39,16 @@ public class QuorumReadWriteTest {
 
     @Test
     public void quorumReadRepairTest() throws IOException {
+        /*
+        * Quorum + readRepair = eventual consistency
+        * Cannot solve challenge with incomplete writes
+        * Since there are no transactions
+        * can lead to multiple incomplete writes : and eventually with read repairs : will reach eventual consistency
+        * only one repair at a time, even if it fails
+        * Anti-entropy Repair : bulk repair, using merkle tree : todo read merkle tree
+        * Limitation of quorum :
+        *
+         * */
         List<QuorumKVStore> clusterNodes = startCluster(3);
         QuorumKVStore athens = clusterNodes.get(0);
         QuorumKVStore byzantium = clusterNodes.get(1);
@@ -52,6 +62,7 @@ public class QuorumReadWriteTest {
 
         assertEquals("Microservices", athens.getStoredValue("title").getValue());
         assertEquals("Microservices", cyrene.getStoredValue("title").getValue());
+        assertEquals("", byzantium.getStoredValue("title").getValue());
 
 
         String value = kvClient.getValue(cyrene.getClientConnectionAddress(), "title");

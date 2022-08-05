@@ -8,3 +8,15 @@ For building, just run './gradlew clean assemble'
 3. Make readRepair pass. Complete ReadQuorumCallback
 3. Pass QuorumReadWriteTest#nodesShouldRejectRequestsFromPreviousGenerationNode
    Add logic to reject requests from older generation in QuorumKVStore#handleSetValueRequest
+
+
+---
+## Notes
+1. Basic Quorum
+- availability : successful write : which leads to partial write
+- have to wait for read repairs to ensure consistency: *Eventual Consistency*
+- write failed only 1 server was successful
+- 2 diff clients connect diff server: diff values for same query :meh:
+- 
+
+1. Fault Tolerance quorum
