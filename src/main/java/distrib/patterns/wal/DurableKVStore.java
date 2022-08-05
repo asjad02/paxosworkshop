@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/* OUTCOME :
+*  1. kafka itself is a write ahead log
+*
+* */
 public class DurableKVStore {
     private final Map<String, String> kv = new HashMap<>();
     public String get(String key) {
@@ -15,6 +19,7 @@ public class DurableKVStore {
 
     public void put(String key, String value) {
         //TODO: Assignment 1: appendLog before storing key and value.
+        appendLog(key, value);
         kv.put(key, value);
     }
 
@@ -30,6 +35,7 @@ public class DurableKVStore {
         this.config = config;
         this.wal = WriteAheadLog.openWAL(config);
        //TODO: applyLog at startup.
+        applyLog();
     }
 
     public void applyLog() {
