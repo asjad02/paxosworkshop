@@ -83,6 +83,7 @@ public class QuorumReadWriteTest {
         athens.dropMessagesTo(byzantium);
         athens.dropMessagesTo(cyrene);
 
+
         InetAddressAndPort athensAddress = athens.getClientConnectionAddress();
         KVClient kvClient = new KVClient();
         String response = kvClient.setKV(athensAddress, "title", "Microservices");

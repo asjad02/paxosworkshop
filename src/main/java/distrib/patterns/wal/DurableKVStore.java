@@ -13,6 +13,7 @@ import java.util.Map;
 * */
 public class DurableKVStore {
     private final Map<String, String> kv = new HashMap<>();
+
     public String get(String key) {
         return kv.get(key);
     }
@@ -24,7 +25,9 @@ public class DurableKVStore {
     }
 
     private Long appendLog(String key, String value) {
-        return wal.writeEntry(new SetValueCommand(key, value).serialize());
+        Long aLong = wal.writeEntry(new SetValueCommand(key, value).serialize());
+        wal.flush();
+        return aLong;
     }
 
     //@VisibleForTesting
