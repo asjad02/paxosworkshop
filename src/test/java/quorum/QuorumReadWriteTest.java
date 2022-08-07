@@ -112,6 +112,7 @@ public class QuorumReadWriteTest {
 
     @Test
     public void nodesShouldRejectRequestsFromPreviousGenerationNode() throws IOException {
+//        Usage of Tokens to solve this
         List<QuorumKVStore> clusterNodes = startCluster(3);
         QuorumKVStore primaryClusterNode = clusterNodes.get(0);
         KVClient client = new KVClient();

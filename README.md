@@ -20,3 +20,17 @@ For building, just run './gradlew clean assemble'
 - 
 
 1. Fault Tolerance quorum
+
+
+# Problems in Distributed System
+- Split Brain
+Split brain in a distributed system is a problem that can occur in consistent systems. 
+If a network partition occurs in a consistent system then one side or the other (or both)
+of the partition needs to stop responding to requests to maintain the consistency guarantee. 
+> If both sides continue to respond to reads and writes while they are unable to communicate with each other they will diverge and no longer be consistent.
+This state where both sides of the partition remain available is called split brain.
+https://en.m.wikipedia.org/wiki/Split-brain_(computing)
+ 
+[reference](https://qr.ae/pGVjZc)
+
+- 

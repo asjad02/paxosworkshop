@@ -49,7 +49,8 @@ public class QuorumKVStore {
     Network network = new Network();
     DurableKVStore systemStorage;
 
-    public QuorumKVStore(SystemClock clock, Config config, InetAddressAndPort clientAddress, InetAddressAndPort peerConnectionAddress, List<InetAddressAndPort> peers) throws IOException {
+    public QuorumKVStore(SystemClock clock, Config config, InetAddressAndPort clientAddress,
+                         InetAddressAndPort peerConnectionAddress, List<InetAddressAndPort> peers) throws IOException {
         this.clock = clock;
         this.config = config;
         this.clientConnectionAddress = clientAddress;
@@ -65,6 +66,13 @@ public class QuorumKVStore {
         }, clientAddress);
     }
 
+    /**
+     * if any mechanism to make some node a primary node
+    * */
+    public void becomePrimary() {
+        generation = maxKnownGeneration() + 1;
+    }
+
     private void handleClientRequest(Message<RequestOrResponse> message) {
         RequestOrResponse request = message.getRequest();
         if (request.getRequestId() == RequestId.SetValueRequest.getId()) {
@@ -78,7 +86,7 @@ public class QuorumKVStore {
 
     private int incrementAndGetGeneration() {
         String s = systemStorage.get("generation");
-        int currentGeneration = s == null? firstGeneration :Integer.parseInt(s) + 1;
+        int currentGeneration = s == null ? firstGeneration : Integer.parseInt(s) + 1;
         systemStorage.put("generation", String.valueOf(currentGeneration));
         return currentGeneration;
     }
@@ -91,7 +99,9 @@ public class QuorumKVStore {
     }
 
     int generation;
-    private void handleClientRequestRequiringQuorum(List<InetAddressAndPort> replicas, RequestOrResponse clientRequest, RequestCallback requestCallback, RequestId requestId) {
+
+    private void handleClientRequestRequiringQuorum(List<InetAddressAndPort> replicas, RequestOrResponse clientRequest,
+                                                    RequestCallback requestCallback, RequestId requestId) {
         for (InetAddressAndPort replica : replicas) {
             int correlationId = nextRequestId();
             requestWaitingList.add(correlationId, requestCallback);
@@ -138,17 +148,19 @@ public class QuorumKVStore {
         int maxKnownGeneration = maxKnownGeneration();
         Integer requestGeneration = request.getGeneration();
         //TODO: Assignment 3 Add check for generation while handling requests.
+        if (requestGeneration < maxKnownGeneration) {
+            String errorMessage = "Rejecting request from generation " + requestGeneration + " as already accepted from generation " + maxKnownGeneration;
+            sendResponseMessage(new RequestOrResponse(requestGeneration, RequestId.SetValueResponse.getId(), errorMessage.getBytes(), request.getCorrelationId(), peerConnectionAddress), request.getFromAddress());
+            return;
+        }
+
         SetValueRequest setValueRequest = deserialize(request, SetValueRequest.class);
         kv.put(setValueRequest.getKey(), new StoredValue(setValueRequest.getKey(), setValueRequest.getValue(), clock.now(), requestGeneration));
         sendResponseMessage(new RequestOrResponse(requestGeneration, RequestId.SetValueResponse.getId(), "Success".getBytes(), request.getCorrelationId(), peerConnectionAddress), request.getFromAddress());
+
+
     }
 
-    ///        if (requestGeneration < maxKnownGeneration) {
-    //            String errorMessage = "Rejecting request from generation " + requestGeneration + " as already accepted from generation " + maxKnownGeneration;
-    //            sendResponseMessage(new RequestOrResponse(requestGeneration, RequestId.SetValueResponse.getId(), errorMessage.getBytes(), request.getCorrelationId(), peerConnectionAddress), request.getFromAddress());
-    //            return;
-    //        }
-    ///
     private int maxKnownGeneration() {
         return kv.values().stream().map(kv -> kv.generation).max(Integer::compare).orElse(0);
     }
