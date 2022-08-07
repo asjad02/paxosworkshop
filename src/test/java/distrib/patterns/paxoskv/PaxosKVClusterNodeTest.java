@@ -18,13 +18,24 @@ public class PaxosKVClusterNodeTest {
     @Test
     public void singleValuePaxosTest() throws IOException {
         List<InetAddressAndPort> clientInterfaceAddresses = startCluster(3);
-
-        RequestOrResponse requestOrResponse = createSetValueRequest("key", "value");
-
         SocketClient client = new SocketClient(clientInterfaceAddresses.get(0));
-        RequestOrResponse response = client.blockingSend(requestOrResponse);
 
-        assertEquals("value", JsonSerDes.deserialize(response.getMessageBodyJson(), String.class));
+        assertEquals("Martin", JsonSerDes.deserialize(client.blockingSend(createSetValueRequest("author", "Martin"))
+                                                            .getMessageBodyJson(), String.class));
+    }
+
+    @Test
+    public void singleValuePaxosTestForUpdate() throws IOException {
+        List<InetAddressAndPort> clientInterfaceAddresses = startCluster(3);
+        SocketClient client = new SocketClient(clientInterfaceAddresses.get(0));
+
+
+        assertEquals("Nicroservice", JsonSerDes.deserialize(client.blockingSend(createSetValueRequest("title", "Nicroservice"))
+                                                                  .getMessageBodyJson(), String.class));
+//      by mistake we save Nicroservice but we couldnt update the value for key title
+        assertEquals("Nicroservice", JsonSerDes.deserialize(client.blockingSend(createSetValueRequest("title", "Microservice"))
+                                                                   .getMessageBodyJson(), String.class));
+
     }
 
     @Test
@@ -57,15 +68,13 @@ public class PaxosKVClusterNodeTest {
 
     private RequestOrResponse createSetValueRequest(String key, String value) {
         SetValueRequest setValueRequest = new SetValueRequest(key, value);
-        RequestOrResponse requestOrResponse = new RequestOrResponse(RequestId.SetValueRequest.getId(),
-                JsonSerDes.serialize(setValueRequest), 1);
+        RequestOrResponse requestOrResponse = new RequestOrResponse(RequestId.SetValueRequest.getId(), JsonSerDes.serialize(setValueRequest), 1);
         return requestOrResponse;
     }
 
     private RequestOrResponse createGetValueRequest(String key) {
         GetValueRequest setValueRequest = new GetValueRequest(key);
-        RequestOrResponse requestOrResponse = new RequestOrResponse(RequestId.GetValueRequest.getId(),
-                JsonSerDes.serialize(setValueRequest), 1);
+        RequestOrResponse requestOrResponse = new RequestOrResponse(RequestId.GetValueRequest.getId(), JsonSerDes.serialize(setValueRequest), 1);
         return requestOrResponse;
     }
 
